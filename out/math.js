@@ -1,114 +1,118 @@
-/*module math {
-
-
-    export class Point {
-        x: number;
-        y: number;
-        constructor(x: number, y: number) {
+var math;
+(function (math) {
+    var Point = (function () {
+        function Point(x, y) {
             this.x = x;
             this.y = y;
         }
-    }
-
-    export function pointAppendMatrix(point: Point, m: Matrix): Point {
-        var x = m.a * point.x + m.c * point.y + m.tx;
-        var y = m.b * point.x + m.d * point.y + m.ty;
+        return Point;
+    }());
+    math.Point = Point;
+    var Rectangle = (function () {
+        function Rectangle(x, y, width, height) {
+            this.x = 0;
+            this.y = 0;
+            this.width = 1;
+            this.height = 1;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+        Rectangle.prototype.isPointIn = function (x, y) {
+            if (x >= this.x &&
+                y >= this.y &&
+                x < this.x + this.width &&
+                y < this.y + this.height) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        return Rectangle;
+    }());
+    math.Rectangle = Rectangle;
+    function pointAppendMatrix(point, m) {
+        var x = m.m11 * point.x + m.m12 * point.y + m.dx;
+        var y = m.m21 * point.x + m.m22 * point.y + m.dy;
         return new Point(x, y);
-
     }
-
+    math.pointAppendMatrix = pointAppendMatrix;
     /**
      * 使用伴随矩阵法求逆矩阵
      * http://wenku.baidu.com/view/b0a9fed8ce2f0066f53322a9
-
-    export function invertMatrix(m: Matrix): Matrix {
-
-
-        var a = m.a;
-        var b = m.b;
-        var c = m.c;
-        var d = m.d;
-        var tx = m.tx;
-        var ty = m.ty;
-
+     */
+    function invertMatrix(m) {
+        var a = m.m11;
+        var b = m.m21;
+        var c = m.m12;
+        var d = m.m22;
+        var tx = m.dx;
+        var ty = m.dy;
         var determinant = a * d - b * c;
         var result = new Matrix(1, 0, 0, 1, 0, 0);
         if (determinant == 0) {
             throw new Error("no invert");
         }
-
         determinant = 1 / determinant;
-        var k = result.a = d * determinant;
-        b = result.b = -b * determinant;
-        c = result.c = -c * determinant;
-        d = result.d = a * determinant;
-        result.tx = -(k * tx + c * ty);
-        result.ty = -(b * tx + d * ty);
+        var k = result.m11 = d * determinant;
+        b = result.m21 = -b * determinant;
+        c = result.m12 = -c * determinant;
+        d = result.m22 = a * determinant;
+        result.dx = -(k * tx + c * ty);
+        result.dy = -(b * tx + d * ty);
         return result;
-
     }
-
-    export function matrixAppendMatrix(m1: Matrix, m2: Matrix): Matrix {
-
+    math.invertMatrix = invertMatrix;
+    function matrixAppendMatrix(m1, m2) {
         var result = new Matrix();
-        result.a = m1.a * m2.a + m1.b * m2.c;
-        result.b = m1.a * m2.b + m1.b * m2.d;
-        result.c = m2.a * m1.c + m2.c * m1.d;
-        result.d = m2.b * m1.c + m1.d * m2.d;
-        result.tx = m2.a * m1.tx + m2.c * m1.ty + m2.tx;
-        result.ty = m2.b * m1.tx + m2.d * m1.ty + m2.ty;
+        result.m11 = m1.m11 * m2.m11 + m1.m21 * m2.m12;
+        result.m21 = m1.m11 * m2.m21 + m1.m21 * m2.m22;
+        result.m12 = m2.m11 * m1.m12 + m2.m12 * m1.m22;
+        result.m22 = m2.m21 * m1.m12 + m1.m22 * m2.m22;
+        result.dx = m2.m11 * m1.dx + m2.m12 * m1.dy + m2.dx;
+        result.dy = m2.m21 * m1.dx + m2.m22 * m1.dy + m2.dy;
         return result;
     }
-
+    math.matrixAppendMatrix = matrixAppendMatrix;
     var PI = Math.PI;
     var HalfPI = PI / 2;
     var PacPI = PI + HalfPI;
     var TwoPI = PI * 2;
-    var DEG_TO_RAD: number = Math.PI / 180;
-
-
-    export class Matrix {
-
-        constructor(a: number = 1, b: number = 0, c: number = 0, d: number = 1, tx: number = 0, ty: number = 0) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-            this.d = d;
-            this.tx = tx;
-            this.ty = ty;
+    var DEG_TO_RAD = Math.PI / 180;
+    var Matrix = (function () {
+        function Matrix(m11, m21, m12, m22, dx, dy) {
+            if (m11 === void 0) { m11 = 1; }
+            if (m21 === void 0) { m21 = 0; }
+            if (m12 === void 0) { m12 = 0; }
+            if (m22 === void 0) { m22 = 1; }
+            if (dx === void 0) { dx = 0; }
+            if (dy === void 0) { dy = 0; }
+            this.m11 = m11;
+            this.m21 = m21;
+            this.m12 = m12;
+            this.m22 = m22;
+            this.dx = dx;
+            this.dy = dy;
         }
-
-        public a: number;
-
-        public b: number;
-
-        public c: number;
-
-        public d: number;
-
-        public tx: number;
-
-        public ty: number;
-
-        public toString(): string {
-            return "(a=" + this.a + ", b=" + this.b + ", c=" + this.c + ", d=" + this.d + ", tx=" + this.tx + ", ty=" + this.ty + ")";
-        }
-
-        updateFromDisplayObject(x: number, y: number, scaleX: number, scaleY: number, rotation: number) {
-            this.tx = x;
-            this.ty = y;
+        Matrix.prototype.toString = function () {
+            return "(a=" + this.m11 + ", b=" + this.m21 + ", c=" + this.m12 + ", d=" + this.m22 + ", tx=" + this.dx + ", ty=" + this.dy + ")";
+        };
+        Matrix.prototype.updateFromDisplayObject = function (x, y, scaleX, scaleY, rotation) {
+            this.dx = x;
+            this.dy = y;
             var skewX, skewY;
             skewX = skewY = rotation / 180 * Math.PI;
-
             var u = Math.cos(skewX);
             var v = Math.sin(skewX);
-            this.a = Math.cos(skewY) * scaleX;
-            this.b = Math.sin(skewY) * scaleX;
-            this.c = -v * scaleY;
-            this.d = u * scaleY;
-
-        }
-    }
-}
-*/ 
+            this.m11 = Math.cos(skewY) * scaleX;
+            this.m21 = Math.sin(skewY) * scaleX;
+            this.m12 = -v * scaleY;
+            this.m22 = u * scaleY;
+        };
+        return Matrix;
+    }());
+    math.Matrix = Matrix;
+})(math || (math = {}));
 //# sourceMappingURL=math.js.map
